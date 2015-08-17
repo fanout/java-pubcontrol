@@ -33,7 +33,7 @@ public class Item {
     // into a hash that is used for publishing to clients. If more than one
     // instance of the same type of Format implementation was specified then
     // an error will be raised.
-    public Map export() {
+    public Map<String, Object> export() {
         List<Class> formatTypes = new ArrayList<Class>();
         for (Format format : this.formats) {
             if (formatTypes.contains(format.getClass()))

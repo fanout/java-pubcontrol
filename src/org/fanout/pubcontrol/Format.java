@@ -20,5 +20,5 @@ public interface Format {
 
     // The export method which should return a format-specific hash
     // containing the required format-specific data.
-    Map export();
+    Map<String, Object> export();
 }

@@ -1,7 +1,7 @@
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-import java.util.HashMap;
+import java.util.*;
 import org.fanout.pubcontrol.*;
 
 public class FormatTest {
@@ -15,8 +15,8 @@ public class FormatTest {
             return "test-name";
         }
 
-        public Map export() {
-            return new HashMap();
+        public Map<String, Object> export() {
+            return new HashMap<String, Object>();
         }
     }
 }
