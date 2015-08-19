@@ -1,4 +1,4 @@
-//        item.java
+//        Item.java
 //        ~~~~~~~~~
 //        This module implements the Item class.
 //        :authors: Konstantin Bokarius.

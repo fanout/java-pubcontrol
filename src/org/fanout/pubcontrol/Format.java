@@ -1,4 +1,4 @@
-//        format.java
+//        Format.java
 //        ~~~~~~~~~
 //        This module implements the Format class.
 //        :authors: Konstantin Bokarius.
@@ -9,7 +9,7 @@ package org.fanout.pubcontrol;
 
 import java.util.*;
 
-// The Format class is provided as a base class for all publishing
+// The Format interface is provided as a base class for all publishing
 // formats that are included in the Item class. Examples of format
 // implementations include JsonObjectFormat and HttpStreamFormat.
 public interface Format {

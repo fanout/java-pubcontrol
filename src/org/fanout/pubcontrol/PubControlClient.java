@@ -1,4 +1,4 @@
-//        pubcontrolclient.java
+//        PubControlClient.java
 //        ~~~~~~~~~
 //        This module implements the PubControlClient class.
 //        :authors: Konstantin Bokarius.
