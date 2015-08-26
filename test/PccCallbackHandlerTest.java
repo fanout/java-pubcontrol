@@ -9,7 +9,7 @@ public class PccCallbackHandlerTest {
     public void testHandler1() {
         Callback callback = new Callback();
         PccCallbackHandler handler = new PccCallbackHandler(1, callback);
-        handler.handler(true, null);
+        handler.completed(true, null);
         assertEquals(callback.callbackExecuted, true);
         assertEquals(callback.callbackResult, true);
         assertEquals(callback.callbackMessage, null);
@@ -19,10 +19,10 @@ public class PccCallbackHandlerTest {
     public void testHandler2() {
         Callback callback = new Callback();
         PccCallbackHandler handler = new PccCallbackHandler(3, callback);
-        handler.handler(true, null);
-        handler.handler(true, null);
+        handler.completed(true, null);
+        handler.completed(true, null);
         assertEquals(callback.callbackExecuted, false);
-        handler.handler(true, null);
+        handler.completed(true, null);
         assertEquals(callback.callbackExecuted, true);
         assertEquals(callback.callbackResult, true);
         assertEquals(callback.callbackMessage, null);
@@ -32,10 +32,10 @@ public class PccCallbackHandlerTest {
     public void testHandler3() {
         Callback callback = new Callback();
         PccCallbackHandler handler = new PccCallbackHandler(3, callback);
-        handler.handler(false, "error");
-        handler.handler(true, null);
+        handler.completed(false, "error");
+        handler.completed(true, null);
         assertEquals(callback.callbackExecuted, false);
-        handler.handler(true, null);
+        handler.completed(true, null);
         assertEquals(callback.callbackExecuted, true);
         assertEquals(callback.callbackResult, false);
         assertEquals(callback.callbackMessage, "error");

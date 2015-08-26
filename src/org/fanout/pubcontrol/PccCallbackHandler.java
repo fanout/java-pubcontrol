@@ -15,7 +15,7 @@ package org.fanout.pubcontrol;
 // instances. A failure to publish in any of the PubControlClient instances
 // will result in a failed result passed to the callback method and the error
 // from the first encountered failure.
-public class PccCallbackHandler {
+public class PccCallbackHandler implements PublishCallback {
     private int numCalls;
     private PublishCallback callback;
     private boolean success;
@@ -31,13 +31,13 @@ public class PccCallbackHandler {
         this.firstErrorMessage = null;
     }
 
-    // The handler method which is executed by PubControlClient when publishing
+    // The completed method which is executed by PubControlClient when publishing
     // is complete. This method tracks the number of publishes performed and
     // when all publishes are complete it will call the callback method
     // originally specified by the consumer. If publishing failures are
     // encountered only the first error is saved and reported to the callback
     // method.
-    public void handler(boolean success, String message) {
+    public void completed(boolean success, String message) {
         if (!success && this.success) {
             this.success = false;
             this.firstErrorMessage = message;
