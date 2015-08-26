@@ -9,6 +9,7 @@ package org.fanout.pubcontrol;
 
 import java.util.concurrent.locks.*;
 import java.util.*;
+import java.io.UnsupportedEncodingException;
 
 import java.security.Key;
 import javax.xml.bind.DatatypeConverter;
@@ -101,12 +102,14 @@ public class PubControlClient {
     // The finish method is a blocking method that ensures that all asynchronous
     // publishing is complete prior to returning and allowing the consumer to
     // proceed.
-    public void finish() throws InterruptedException {
+    public void finish() {
         this.lock.lock();
         if (this.pubWorker != null) {
             Object[] req = {"stop"};
             this.queueReq(req);
-            this.pubWorker.join();
+            try {
+                this.pubWorker.join();
+            } catch (InterruptedException exception) { }
             this.pubWorker = null;
         }
         this.lock.unlock();
@@ -139,7 +142,18 @@ public class PubControlClient {
     // authorization information was provided via the publicly accessible
     // 'set_*_auth' methods defined above.
     private String genAuthHeader() {
-        return "";
+        if (this.authBasicUser != null && this.authBasicPass != null) {
+            try {
+                return Base64.getEncoder().encodeToString(
+                        (this.authBasicUser + ":" +
+                        this.authBasicPass).getBytes("utf-8"));
+            } catch (UnsupportedEncodingException exception) { }
+        }
+        else if (this.authJwtClaim != null) {
+
+        }
+
+        return null;
     }
 
     /*

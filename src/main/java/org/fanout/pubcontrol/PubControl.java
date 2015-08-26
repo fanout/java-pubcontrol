@@ -58,7 +58,7 @@ public class PubControl {
     // The finish method is a blocking method that ensures that all asynchronous
     // publishing is complete for all of the configured PubControlClient
     // instances prior to returning and allowing the consumer to proceed.
-    public void finish() throws InterruptedException {
+    public void finish() {
         for (PubControlClient client : this.clients) {
             client.finish();
         }
