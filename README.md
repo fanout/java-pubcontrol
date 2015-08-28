@@ -84,7 +84,7 @@ public class PubControlExample {
         pub.applyConfig(config);
 
         // Remove all configured endpoints:
-        //pub.removeAllClients();
+        pub.removeAllClients();
 
         // Explicitly add an endpoint as a PubControlClient instance:
         PubControlClient pubClient = new PubControlClient("<myendpoint_uri");
