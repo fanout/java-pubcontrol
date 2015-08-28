@@ -49,8 +49,11 @@ public class PubControl {
             PubControlClient client = new PubControlClient(uri);
             Object iss = entry.get("iss");
             Object key = entry.get("key");
-            if (iss != null && key != null)
-                client.setAuthJwt((Map<String, Object>)iss, (byte[])key);
+            if (iss != null && key != null) {
+                Map<String, Object> claims = new HashMap<String, Object>();
+                claims.put("iss", (String)iss);
+                client.setAuthJwt(claims, (byte[])key);
+            }
             this.clients.add(client);
         }
     }

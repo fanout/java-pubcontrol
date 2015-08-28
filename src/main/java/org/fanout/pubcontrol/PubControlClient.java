@@ -163,7 +163,7 @@ public class PubControlClient implements Runnable {
                 claims.put("exp", new Date((new Date()).getTime() + (3600 * 1000)));
             String token = Jwts.builder().setClaims(claims).
                     signWith(SignatureAlgorithm.HS256, decodedKey).compact();
-            return "Bearer" + token;
+            return "Bearer " + token;
         }
 
         return null;

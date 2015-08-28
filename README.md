@@ -13,63 +13,100 @@ java-pubcontrol is offered under the MIT license. See the LICENSE file.
 Installation
 ------------
 
-```sh
+Maven:
+
+```xml
+<dependency>
+  <groupId>org.fanout.pubcontrol</groupId>
+  <artifactId>pubcontrol</artifactId>
+  <version>1.0.0</version>
+</dependency>
 ```
 
 Usage
 -----
 
 ```java
-require 'pubcontrol'
+import org.fanout.pubcontrol.*;
+import javax.xml.bind.DatatypeConverter;
+import java.util.*;
 
-class HttpResponseFormat < Format
-  def initialize(body)
-    @body = body
-  end
+public class PubControlExample {
+    private static class HttpResponseFormat implements Format {
+        private String body;
 
-  def name
-    return 'http-response'
-  end
+        public HttpResponseFormat(String body) {
+            this.body = body;
+        }
 
-  def export
-    return {'body' => @body}
-  end
-end
+        public String name() {
+            return "http-response";
+        }
 
-def callback(result, message)
-  if result
-    puts 'Publish successful'
-  else
-    puts 'Publish failed with message: ' + message.to_s
-  end
-end
+        public Map<String, Object> export() {
+            Map<String, Object> export = new HashMap<String, Object>();
+            export.put("body", body);
+            return export;
+        }
+    }
 
-# PubControl can be initialized with or without an endpoint configuration.
-# Each endpoint can include optional JWT authentication info.
-# Multiple endpoints can be included in a single configuration.
+    private static class Callback implements PublishCallback {
+        public void completed(boolean result, String message) {
+            if (result)
+                System.out.println("Publish successful");
+            else
+                System.out.println("Publish failed with message: " + message);
+        }
+    }
 
-# Initialize PubControl with a single endpoint:
-pub = PubControl.new({'uri' => 'https://api.fanout.io/realm/<myrealm>',
-    'iss' => '<myrealm>', 'key' => Base64.decode64('<realmkey>')})
+    public static void main(String[] args) {
+        // PubControl can be initialized with or without an endpoint configuration.
+        // Each endpoint can include optional JWT authentication info.
+        // Multiple endpoints can be included in a single configuration.
 
-# Add new endpoints by applying an endpoint configuration:
-pub.apply_config([{'uri' => '<myendpoint_uri_1>'},
-    {'uri' => '<myendpoint_uri_2>'}])
+        // Initialize PubControl with a single endpoint:
+        List<Map<String, Object>> config = new ArrayList<Map<String, Object>>();
+        Map<String, Object> entry = new HashMap<String, Object>();
+        entry.put("uri", "https://api.fanout.io/realm/<realm>");
+        entry.put("iss", "<realm>");
+        entry.put("key", DatatypeConverter.parseBase64Binary("<key>"));
+        config.add(entry);
+        PubControl pub = new PubControl(config);
 
-# Remove all configured endpoints:
-pub.remove_all_clients
+        // Add new endpoints by applying an endpoint configuration:
+        config = new ArrayList<Map<String, Object>>();
+        HashMap<String, Object> entry1 = new HashMap<String, Object>();
+        entry1.put("uri", "<myendpoint_uri_1>");
+        config.add(entry1);
+        HashMap<String, Object> entry2 = new HashMap<String, Object>();
+        entry2.put("uri", "<myendpoint_uri_2>");
+        config.add(entry2);
+        pub.applyConfig(config);
 
-# Explicitly add an endpoint as a PubControlClient instance:
-pubclient = PubControlClient.new('<myendpoint_uri>')
-# Optionally set JWT auth: pubclient.set_auth_jwt(<claim>, '<key>')
-# Optionally set basic auth: pubclient.set_auth_basic('<user>', '<password>')
-pub.add_client(pubclient)
+        // Remove all configured endpoints:
+        //pub.removeAllClients();
 
-# Publish across all configured endpoints:
-pub.publish('<channel>', Item.new(HttpResponseFormat.new('Test publish!')))
-pub.publish_async('<channel>', Item.new(HttpResponseFormat.new(
-    'Test async publish!')), method(:callback))
+        // Explicitly add an endpoint as a PubControlClient instance:
+        PubControlClient pubClient = new PubControlClient("<myendpoint_uri");
+        // Optionally set JWT auth: pubClient.setAuthJwt(<claims>, '<key>')
+        // Optionally set basic auth: pubClient.setAuthBasic('<user>', '<password>')
+        pub.addClient(pubClient);
 
-# Wait for all async publish calls to complete:
-pub.finish
+        // Publish across all configured endpoints:
+        List<String> channels = new ArrayList<String>();
+        channels.add("test_channel");
+        List<Format> formats = new ArrayList<Format>();
+        formats.add(new HttpResponseFormat("Test publish!"));
+        try {
+            pub.publish(channels, new Item(formats, null, null));
+        } catch (PublishFailedException exception) {
+            System.out.println(exception.getMessage());
+            exception.printStackTrace();
+        }
+        pub.publishAsync(channels, new Item(formats, null, null), new Callback());
+
+        // Wait for all async publish calls to complete:
+        pub.finish();
+    }
+}
 ```

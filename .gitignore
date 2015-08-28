@@ -13,3 +13,6 @@ hs_err_pid*
 
 # maven target folder
 target
+
+# publish test
+PublishTest*
