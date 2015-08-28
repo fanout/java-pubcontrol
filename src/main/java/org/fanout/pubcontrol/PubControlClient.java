@@ -10,6 +10,9 @@ package org.fanout.pubcontrol;
 import java.util.concurrent.locks.*;
 import java.util.*;
 import java.io.UnsupportedEncodingException;
+import java.net.*;
+import javax.net.ssl.HttpsURLConnection;
+import java.io.*;
 
 import java.security.Key;
 import javax.xml.bind.DatatypeConverter;
@@ -17,6 +20,7 @@ import javax.crypto.spec.SecretKeySpec;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.crypto.MacProvider;
+import com.google.gson.Gson;
 
 // The PubControlClient class allows consumers to publish either synchronously
 // or asynchronously to an endpoint of their choice. The consumer wraps a Format
@@ -61,7 +65,8 @@ public class PubControlClient implements Runnable {
 
     // The synchronous publish method for publishing the specified item to the
     // specified channel on the configured endpoint.
-    public void publish(List<String> channels, Item item) {
+    public void publish(List<String> channels, Item item)
+            throws PublishFailedException {
         List<Map<String, Object>> exports = new ArrayList<Map<String, Object>>();
         for (String channel : channels) {
             Map<String, Object> export = item.export();
@@ -196,41 +201,110 @@ public class PubControlClient implements Runnable {
     // An internal method for preparing the HTTP POST request for publishing
     // data to the endpoint. This method accepts the URI endpoint, authorization
     // header, and a list of items to publish.
-    public void pubCall(String uri, String authHeader,
-            List<Map<String, Object>> items) {
-
+    private void pubCall(String uri, String authHeader,
+            List<Map<String, Object>> items) throws PublishFailedException {
+        URL url = null;
+        try {
+            url = new URL(uri + "/publish/");
+        } catch (MalformedURLException exception) {
+            throw new PublishFailedException("failed to publish: bad uri");
+        }
+        Map<String, Object> content = new HashMap<String, Object>();
+        content.put("items", items);
+        String jsonContent = new Gson().toJson(content);
+        if (url.getProtocol() == "https")
+            makeHttpsRequest(url, authHeader, jsonContent);
+        else
+            makeHttpRequest(url, authHeader, jsonContent);
     }
 
-    /*
-    def pubcall(uri, auth_header, items)
-        uri = URI(uri + '/publish/')
-        content = Hash.new
-        content['items'] = items
-        request = Net::HTTP::Post.new(uri.request_uri)
-        request.body = content.to_json
-        if !auth_header.nil?
-            request['Authorization'] = auth_header
-        end
-        request['Content-Type'] = 'application/json'
-        use_ssl = uri.scheme == 'https'
-        response = make_http_request(uri, use_ssl, request)
-        if !response.kind_of? Net::HTTPSuccess
-            raise 'failed to publish: ' + response.class.to_s + ' ' +
-                    response.message
-        end
-    end
+    // Make an HTTP request to publish the specified items.
+    private void makeHttpRequest(URL url, String authHeader,
+            String jsonContent) throws PublishFailedException {
+        HttpURLConnection connection = null;
+        int responseCode = 0;
+        StringBuilder response = new StringBuilder();
+        try {
+            connection = (HttpURLConnection)url.openConnection();
+            connection.setRequestMethod("POST");
+            if (authHeader != null)
+                connection.setRequestProperty("Authorization", authHeader);
+            connection.setRequestProperty("Content-Type",
+                    "application/json");
+            connection.setRequestProperty("Content-Length",
+                    Integer.toString(jsonContent.getBytes().length));
+            connection.setUseCaches(false);
+            connection.setDoOutput(true);
+            DataOutputStream dataOutputStream = new DataOutputStream (
+            connection.getOutputStream());
+            dataOutputStream.writeBytes(jsonContent);
+            dataOutputStream.close();
+            InputStream inputStream = connection.getInputStream();
+            BufferedReader bufferedReader = new BufferedReader(
+                    new InputStreamReader(inputStream));
+            String line;
+            while((line = bufferedReader.readLine()) != null) {
+                response.append(line);
+                response.append('\r');
+            }
+            bufferedReader.close();
+            responseCode = connection.getResponseCode();
+        } catch (Exception exception) {
+            throw new PublishFailedException("failed to publish: " +
+                    exception.getMessage());
+        } finally {
+            if (connection != null)
+                connection.disconnect();
+        }
+        if (responseCode < 200 || responseCode >= 300)
+            throw new PublishFailedException("failed to publish: " +
+                    Integer.toString(responseCode) + " " +
+                    response.toString());
+    }
 
-    // An internal method for making the specified HTTP request to the
-    // specified URI with an option that determines whether to use
-    // SSL.
-    def make_http_request(uri, use_ssl, request)
-        response = Net::HTTP.start(uri.host, uri.port, use_ssl: use_ssl) do |http|
-            http.request(request)
-        end
-        return response
-    end
-
-*/
+    // Make an HTTPS request to publish the specified items.
+    private void makeHttpsRequest(URL url, String authHeader,
+            String jsonContent) throws PublishFailedException {
+        HttpsURLConnection connection = null;
+        int responseCode = 0;
+        StringBuilder response = new StringBuilder();
+        try {
+            connection = (HttpsURLConnection)url.openConnection();
+            connection.setRequestMethod("POST");
+            if (authHeader != null)
+                connection.setRequestProperty("Authorization", authHeader);
+            connection.setRequestProperty("Content-Type",
+                    "application/json");
+            connection.setRequestProperty("Content-Length",
+                    Integer.toString(jsonContent.getBytes().length));
+            connection.setUseCaches(false);
+            connection.setDoOutput(true);
+            DataOutputStream dataOutputStream = new DataOutputStream (
+            connection.getOutputStream());
+            dataOutputStream.writeBytes(jsonContent);
+            dataOutputStream.close();
+            InputStream inputStream = connection.getInputStream();
+            BufferedReader bufferedReader = new BufferedReader(
+                    new InputStreamReader(inputStream));
+            String line;
+            while((line = bufferedReader.readLine()) != null) {
+                response.append(line);
+                response.append('\r');
+            }
+            bufferedReader.close();
+            responseCode = connection.getResponseCode();
+        } catch (Exception exception) {
+            throw new PublishFailedException("failed to publish: " +
+                    exception.getMessage());
+        } finally {
+            if (connection != null)
+                connection.disconnect();
+        }
+        if (responseCode < 200 || responseCode >= 300)
+            throw new PublishFailedException("failed to publish: " +
+                    Integer.toString(responseCode) + " " +
+                    response.toString());
+    }
 
     // An internal class that is meant to run as a separate thread and process
     // asynchronous publishing requests. The method runs continously and

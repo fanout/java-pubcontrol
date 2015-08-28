@@ -66,7 +66,8 @@ public class PubControl {
 
     // The synchronous publish method for publishing the specified item to the
     // specified channels for all of the configured PubControlClient instances.
-    public void publish(List<String> channels, Item item) {
+    public void publish(List<String> channels, Item item)
+            throws PublishFailedException {
         for (PubControlClient client : this.clients) {
             client.publish(channels, item);
         }
