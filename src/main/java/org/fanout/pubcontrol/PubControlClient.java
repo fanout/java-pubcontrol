@@ -191,6 +191,7 @@ public class PubControlClient implements Runnable {
         try {
             this.pubCall(uri, authHeader, items);
         } catch (Exception exception) {
+            result = false;
             message = exception.getMessage();
         }
         for (PublishCallback callback : callbacks)
