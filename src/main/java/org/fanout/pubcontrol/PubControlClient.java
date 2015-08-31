@@ -212,21 +212,21 @@ public class PubControlClient implements Runnable {
         Map<String, Object> content = new HashMap<String, Object>();
         content.put("items", items);
         String jsonContent = new Gson().toJson(content);
-        if (url.getProtocol() == "https")
-            makeHttpsRequest(url, authHeader, jsonContent);
-        else
-            makeHttpRequest(url, authHeader, jsonContent);
+        makeHttpRequest(url, authHeader, jsonContent);
     }
 
     // Make an HTTP request to publish the specified items.
     private void makeHttpRequest(URL url, String authHeader,
             String jsonContent) throws PublishFailedException {
-        HttpURLConnection connection = null;
+        URLConnection connection = null;
         int responseCode = 0;
         StringBuilder response = new StringBuilder();
         try {
-            connection = (HttpURLConnection)url.openConnection();
-            connection.setRequestMethod("POST");
+            connection = url.openConnection();
+            if (connection instanceof HttpURLConnection)
+                ((HttpURLConnection)connection).setRequestMethod("POST");
+            else
+                ((HttpsURLConnection)connection).setRequestMethod("POST");
             if (authHeader != null)
                 connection.setRequestProperty("Authorization", authHeader);
             connection.setRequestProperty("Content-Type",
@@ -248,57 +248,21 @@ public class PubControlClient implements Runnable {
                 response.append('\r');
             }
             bufferedReader.close();
-            responseCode = connection.getResponseCode();
+            if (connection instanceof HttpURLConnection)
+                responseCode = ((HttpURLConnection)connection).getResponseCode();
+            else
+                responseCode = ((HttpsURLConnection)connection).getResponseCode();
         } catch (Exception exception) {
             throw new PublishFailedException("failed to publish: " +
                     exception.getMessage());
         } finally {
             if (connection != null)
-                connection.disconnect();
-        }
-        if (responseCode < 200 || responseCode >= 300)
-            throw new PublishFailedException("failed to publish: " +
-                    Integer.toString(responseCode) + " " +
-                    response.toString());
-    }
-
-    // Make an HTTPS request to publish the specified items.
-    private void makeHttpsRequest(URL url, String authHeader,
-            String jsonContent) throws PublishFailedException {
-        HttpsURLConnection connection = null;
-        int responseCode = 0;
-        StringBuilder response = new StringBuilder();
-        try {
-            connection = (HttpsURLConnection)url.openConnection();
-            connection.setRequestMethod("POST");
-            if (authHeader != null)
-                connection.setRequestProperty("Authorization", authHeader);
-            connection.setRequestProperty("Content-Type",
-                    "application/json");
-            connection.setRequestProperty("Content-Length",
-                    Integer.toString(jsonContent.getBytes().length));
-            connection.setUseCaches(false);
-            connection.setDoOutput(true);
-            DataOutputStream dataOutputStream = new DataOutputStream (
-            connection.getOutputStream());
-            dataOutputStream.writeBytes(jsonContent);
-            dataOutputStream.close();
-            InputStream inputStream = connection.getInputStream();
-            BufferedReader bufferedReader = new BufferedReader(
-                    new InputStreamReader(inputStream));
-            String line;
-            while((line = bufferedReader.readLine()) != null) {
-                response.append(line);
-                response.append('\r');
+            {
+                if (connection instanceof HttpURLConnection)
+                    ((HttpURLConnection)connection).disconnect();
+                else
+                    ((HttpsURLConnection)connection).disconnect();
             }
-            bufferedReader.close();
-            responseCode = connection.getResponseCode();
-        } catch (Exception exception) {
-            throw new PublishFailedException("failed to publish: " +
-                    exception.getMessage());
-        } finally {
-            if (connection != null)
-                connection.disconnect();
         }
         if (responseCode < 200 || responseCode >= 300)
             throw new PublishFailedException("failed to publish: " +
@@ -330,7 +294,7 @@ public class PubControlClient implements Runnable {
             List<Object[]> reqs = new ArrayList<Object[]>();
             while (this.reqQueue.size() > 0 && reqs.size() < 10) {
                 Object[] m = this.reqQueue.removeFirst();
-                if (m[0] == "stop") {
+                if (m[0].equals("stop")) {
                     quit = true;
                     break;
                 }
