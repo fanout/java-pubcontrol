@@ -149,7 +149,7 @@ public class PubControlClient implements Runnable {
     private String genAuthHeader() {
         if (this.authBasicUser != null && this.authBasicPass != null) {
             try {
-                return Base64.getEncoder().encodeToString(
+                return DatatypeConverter.printBase64Binary(
                         (this.authBasicUser + ":" +
                         this.authBasicPass).getBytes("utf-8"));
             } catch (UnsupportedEncodingException exception) { }
