@@ -18,7 +18,7 @@ public interface Format {
     // include 'json-object' and 'http-response'
     String name();
 
-    // The export method which should return a format-specific hash
+    // The export method which should return a format-specific object
     // containing the required format-specific data.
-    Map<String, Object> export();
+    Object export();
 }

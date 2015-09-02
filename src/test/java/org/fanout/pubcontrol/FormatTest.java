@@ -15,8 +15,8 @@ public class FormatTest {
             return "test-name";
         }
 
-        public Map<String, Object> export() {
-            return new HashMap<String, Object>();
+        public Object export() {
+            return new Object();
         }
     }
 }
