@@ -28,10 +28,4 @@ public class PublishFailedException extends Exception
     {
         super(message, cause);
     }
-
-    public PublishFailedException(String message, Throwable cause,
-            boolean enableSuppression, boolean writableStackTrace)
-    {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }
