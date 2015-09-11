@@ -9,11 +9,14 @@ package org.fanout.pubcontrol;
 
 import java.util.*;
 
-// The PublishCallback interface is used to indicate the result of a publish.
-// The single interface method is called when publishing is completed.
+/**
+ * The PublishCallback interface is used to indicate the result of a publish.
+ * The single interface method is called when publishing is completed.
+ */
 public interface PublishCallback {
-
-    // The event method indicating the publish has completed and receiving
-    // the result and error message (if applicable).
+    /**
+     * The event method indicating that the publish has completed.
+     * Accepts a boolean result and error message if an error occured.
+     */
     void completed(boolean result, String errorMessage);
 }

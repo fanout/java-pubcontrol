@@ -9,16 +9,20 @@ package org.fanout.pubcontrol;
 
 import java.util.*;
 
-// The Format interface is provided as a base class for all publishing
-// formats that are included in the Item class. Examples of format
-// implementations include JsonObjectFormat and HttpStreamFormat.
+/**
+ * Vase class for all publishing formats that are included in the Item class.
+ * Examples of format implementations include JsonObjectFormat and HttpStreamFormat.
+ */
 public interface Format {
 
-    // The name of the format which should return a string. Examples
-    // include 'json-object' and 'http-response'
+    /**
+     * The name of the format which should return a string.
+     * Examples include 'json-object' and 'http-response'.
+     */
     String name();
 
-    // The export method which should return a format-specific object
-    // containing the required format-specific data.
+    /**
+     * Returns a format-specific object containing the required format-specific data.
+     */
     Object export();
 }

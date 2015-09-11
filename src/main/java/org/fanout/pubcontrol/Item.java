@@ -9,30 +9,34 @@ package org.fanout.pubcontrol;
 
 import java.util.*;
 
-// The Item class is a container used to contain one or more format
-// implementation instances where each implementation instance is of a
-// different type of format. An Item instance may not contain multiple
-// implementations of the same type of format. An Item instance is then
-// serialized into a hash that is used for publishing to clients.
+/**
+ * Used to contain one or more format implementation instances.
+ * Each implementation instance is of a different type of format.
+ * An Item instance may not contain multiple implementations of the same
+ * type of format. An Item instance is then serialized into a hash that is
+ * used for publishing to clients.
+ */
 public class Item {
     private List<Format> formats;
     private String id;
     private String prevId;
 
-    // The initialize method can accept either a single Format implementation
-    // instance or an array of Format implementation instances. Optionally
-    // specify an ID and/or previous ID to be sent as part of the message
-    // published to the client.
+    /**
+     * Accepts either an instance or an array of Format implementation instances.
+     * Optionally specify an ID and/or previous ID to be sent as part of the message
+     * published to the client.
+     */
     public Item(List<Format> formats, String id, String prevId) {
         this.id = id;
         this.prevId = prevId;
         this.formats = formats;
     }
 
-    // The export method serializes all of the formats, ID, and previous ID
-    // into a hash that is used for publishing to clients. If more than one
-    // instance of the same type of Format implementation was specified then
-    // an error will be raised.
+    /**
+     * The export method serializes all of the data into a hash.
+     * If more than one instance of the same type of Format implementation
+     * was specified then an error will be raised.
+     */
     public Map<String, Object> export() {
         List<Class> formatTypes = new ArrayList<Class>();
         for (Format format : this.formats) {

@@ -22,12 +22,13 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.crypto.MacProvider;
 import com.google.gson.Gson;
 
-// The PubControlClient class allows consumers to publish either synchronously
-// or asynchronously to an endpoint of their choice. The consumer wraps a Format
-// class instance in an Item class instance and passes that to the publish
-// methods. The async publish method has an optional callback parameter that
-// is called after the publishing is complete to notify the consumer of the
-// result.
+/**
+ * Allows consumers to publish to an endpoint of their choice. The consumer wraps a
+ * Format class instance in an Item class instance and passes that to the publish
+ * methods. The async publish method has an optional callback parameter that
+ * is called after the publishing is complete to notify the consumer of the
+ * result.
+ */
 public class PubControlClient implements Runnable {
     private String uri;
     private final Lock lock = new ReentrantLock();
@@ -40,13 +41,16 @@ public class PubControlClient implements Runnable {
     private Map<String, Object> authJwtClaim;
     private byte[] authJwtKey;
 
-    // Initialize this class with a URL representing the publishing endpoint.
+    /**
+     * Initialize this class with a URL representing the publishing endpoint.
+     */
     public PubControlClient(String uri) {
         this.uri = uri;
     }
 
-    // Call this method and pass a username and password to use basic
-    // authentication with the configured endpoint.
+    /**
+     * Pass a username and password to use basic authentication.
+     */
     public void setAuthBasic(String userName, String password) {
         this.lock.lock();
         this.authBasicUser = userName;
@@ -54,8 +58,9 @@ public class PubControlClient implements Runnable {
         this.lock.unlock();
     }
 
-    // Call this method and pass a claim and key to use JWT authentication
-    // with the configured endpoint.
+    /**
+     * Pass a claim and key to use JWT authentication with the configured endpoint.
+     */
     public void setAuthJwt(Map<String, Object> claims, byte[] key) {
         this.lock.lock();
         this.authJwtClaim = claims;
@@ -63,8 +68,9 @@ public class PubControlClient implements Runnable {
         this.lock.unlock();
     }
 
-    // The synchronous publish method for publishing the specified item to the
-    // specified channel on the configured endpoint.
+    /**
+     * Publish the item synchronously to the specified channels.
+     */
     public void publish(List<String> channels, Item item)
             throws PublishFailedException {
         List<Map<String, Object>> exports = new ArrayList<Map<String, Object>>();
@@ -82,10 +88,10 @@ public class PubControlClient implements Runnable {
         this.pubCall(uri, auth, exports);
     }
 
-    // The asynchronous publish method for publishing the specified item to the
-    // specified channel on the configured endpoint. The callback method is
-    // optional and will be passed the publishing results after publishing is
-    // complete.
+    /**
+     * Publish the item asynchronously to the specified channels.
+     * Optionally provide a callback to be executed after publishing.
+     */
     public void publishAsync(List<String> channels, Item item, PublishCallback callback) {
         List<Map<String, Object>> exports = new ArrayList<Map<String, Object>>();
         for (String channel : channels) {
@@ -104,9 +110,9 @@ public class PubControlClient implements Runnable {
         this.queueReq(req);
     }
 
-    // The finish method is a blocking method that ensures that all asynchronous
-    // publishing is complete prior to returning and allowing the consumer to
-    // proceed.
+    /**
+     * Ensure that all asynchronous publishing is complete prior to returning.
+     */
     public void finish() {
         this.lock.lock();
         if (this.pubWorker != null) {
@@ -120,10 +126,12 @@ public class PubControlClient implements Runnable {
         this.lock.unlock();
     }
 
-    // An internal method that ensures that asynchronous publish calls are
-    // properly processed. This method initializes the required class fields,
-    // starts the pubworker worker thread, and is meant to execute only when
-    // the consumer makes an asynchronous publish call.
+    /**
+     * An internal method that ensures that asynchronous publish calls are properly processed.
+     * This method initializes the required class fields,
+     * starts the pubworker worker thread, and is meant to execute only when
+     * the consumer makes an asynchronous publish call.
+     */
     private void ensureThread() {
         if (this.pubWorker == null) {
             this.pubWorker = new Thread(this);
@@ -131,10 +139,12 @@ public class PubControlClient implements Runnable {
         }
     }
 
-    // An internal method for adding an asynchronous publish request to the
-    // publishing queue. This method will also activate the pubworker worker
-    // thread to make sure that it process any and all requests added to
-    // the queue.
+    /**
+     * An internal method for adding an asynchronous publish request to the publishing queue.
+     * This method will also activate the pubworker worker
+     * thread to make sure that it process any and all requests added to
+     * the queue.
+     */
     private void queueReq(Object[] req) {
         this.pubWorkerLock.lock();
         this.reqQueue.addLast(req);
@@ -142,10 +152,12 @@ public class PubControlClient implements Runnable {
         this.pubWorkerLock.unlock();
     }
 
-    // An internal method used to generate an authorization header. The
-    // authorization header is generated based on whether basic or JWT
-    // authorization information was provided via the publicly accessible
-    // 'set_*_auth' methods defined above.
+    /**
+     * An internal method used to generate an authorization header. The
+     * authorization header is generated based on whether basic or JWT
+     * authorization information was provided via the publicly accessible
+     * 'set_*_auth' methods defined above.
+     */
     private String genAuthHeader() {
         if (this.authBasicUser != null && this.authBasicPass != null) {
             try {
@@ -169,12 +181,14 @@ public class PubControlClient implements Runnable {
         return null;
     }
 
-    // An internal method for publishing a batch of requests. The requests are
-    // parsed for the URI, authorization header, and each request is published
-    // to the endpoint. After all publishing is complete, each callback
-    // corresponding to each request is called (if a callback was originally
-    // provided for that request) and passed a result indicating whether that
-    // request was successfully published.
+    /**
+     * An internal method for publishing a batch of requests. The requests are
+     * parsed for the URI, authorization header, and each request is published
+     * to the endpoint. After all publishing is complete, each callback
+     * corresponding to each request is called (if a callback was originally
+     * provided for that request) and passed a result indicating whether that
+     * request was successfully published.
+     */
     @SuppressWarnings({"unchecked"})
     private void pubBatch(List<Object[]> reqs) {
         if (reqs.size() == 0)
@@ -199,9 +213,11 @@ public class PubControlClient implements Runnable {
                 callback.completed(result, message);
     }
 
-    // An internal method for preparing the HTTP POST request for publishing
-    // data to the endpoint. This method accepts the URI endpoint, authorization
-    // header, and a list of items to publish.
+    /**
+     * An internal method for preparing the HTTP POST request for publishing.
+     * This method accepts the URI endpoint, authorization
+     * header, and a list of items to publish.
+     */
     private void pubCall(String uri, String authHeader,
             List<Map<String, Object>> items) throws PublishFailedException {
         URL url = null;
@@ -216,7 +232,9 @@ public class PubControlClient implements Runnable {
         makeHttpRequest(url, authHeader, jsonContent);
     }
 
-    // Make an HTTP request to publish the specified items.
+    /**
+     * Make an HTTP request to publish the specified items.
+     */
     private void makeHttpRequest(URL url, String authHeader,
             String jsonContent) throws PublishFailedException {
         URLConnection connection = null;
@@ -271,11 +289,13 @@ public class PubControlClient implements Runnable {
                     response.toString());
     }
 
-    // An internal class that is meant to run as a separate thread and process
-    // asynchronous publishing requests. The method runs continously and
-    // publishes requests in batches containing a maximum of 10 requests. The
-    // method completes and the thread is terminated only when a 'stop' command
-    // is provided in the request queue.
+    /**
+     * An internal class that runs as a separate thread and processes async publishes.
+     * The method runs continously and
+     * publishes requests in batches containing a maximum of 10 requests. The
+     * method completes and the thread is terminated only when a 'stop' command
+     * is provided in the request queue.
+     */
     public void run() {
         boolean quit = false;
         while (!quit) {
