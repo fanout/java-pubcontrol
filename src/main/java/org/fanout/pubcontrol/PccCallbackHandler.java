@@ -16,7 +16,7 @@ package org.fanout.pubcontrol;
  * will result in a failed result passed to the callback method and the error
  * from the first encountered failure.
  */
-private class PccCallbackHandler implements PublishCallback {
+public class PccCallbackHandler implements PublishCallback {
     private int numCalls;
     private PublishCallback callback;
     private boolean success;
