@@ -3,7 +3,7 @@
   <groupId>org.fanout</groupId>
   <artifactId>pubcontrol</artifactId>
   <packaging>jar</packaging>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>1.0.1-SNAPSHOT</version>
   <name>pubcontrol</name>
   <description>Java EPCP library.</description>
   <url>https://github.com/fanout/java-pubcontrol</url>

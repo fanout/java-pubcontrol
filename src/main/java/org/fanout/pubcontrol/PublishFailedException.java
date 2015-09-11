@@ -7,7 +7,9 @@
 
 package org.fanout.pubcontrol;
 
-// This exception is used to indicate that a publish failed to complete.
+/**
+  This exception is used to indicate that a publish failed to complete.
+ */
 public class PublishFailedException extends Exception
 {
     public PublishFailedException()
