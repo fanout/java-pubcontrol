@@ -19,9 +19,9 @@ Maven:
 
 ```xml
 <dependency>
-  <groupId>org.fanout.pubcontrol</groupId>
+  <groupId>org.fanout</groupId>
   <artifactId>pubcontrol</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
 </dependency>
 ```
 
