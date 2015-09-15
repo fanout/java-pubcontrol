@@ -21,7 +21,7 @@ Maven:
 <dependency>
   <groupId>org.fanout</groupId>
   <artifactId>pubcontrol</artifactId>
-  <version>1.0.1</version>
+  <version>1.0.7</version>
 </dependency>
 ```
 
