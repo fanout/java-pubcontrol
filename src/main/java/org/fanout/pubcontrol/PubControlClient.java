@@ -37,9 +37,10 @@ public class PubControlClient implements Runnable {
     private Thread pubWorker;
     private Deque<Object[]> reqQueue = new LinkedList<Object[]>();
     private String authBasicUser;
-    private String authBasicPass;;
+    private String authBasicPass;
     private Map<String, Object> authJwtClaim;
     private byte[] authJwtKey;
+    private byte[] authBearerKey;
 
     /**
      * Initialize this class with a URL representing the publishing endpoint.
@@ -65,6 +66,15 @@ public class PubControlClient implements Runnable {
         this.lock.lock();
         this.authJwtClaim = claims;
         this.authJwtKey = key;
+        this.lock.unlock();
+    }
+
+    /**
+     * Pass a key to use bearer authentication with the configured endpoint.
+     */
+    public void setAuthBearer(byte[] key) {
+        this.lock.lock();
+        this.authBearerKey = key;
         this.lock.unlock();
     }
 
@@ -176,6 +186,9 @@ public class PubControlClient implements Runnable {
             String token = Jwts.builder().setClaims(claims).
                     signWith(SignatureAlgorithm.HS256, decodedKey).compact();
             return "Bearer " + token;
+        } else if (this.authBearerKey != null) {
+            String keyString = new String(this.authBearerKey, StandardCharsets.UTF_8);
+            return "Bearer " + keyString;
         }
 
         return null;
