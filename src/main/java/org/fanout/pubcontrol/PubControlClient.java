@@ -40,7 +40,7 @@ public class PubControlClient implements Runnable {
     private String authBasicPass;
     private Map<String, Object> authJwtClaim;
     private byte[] authJwtKey;
-    private byte[] authBearerKey;
+    private String authBearerKey;
 
     /**
      * Initialize this class with a URL representing the publishing endpoint.
@@ -72,7 +72,7 @@ public class PubControlClient implements Runnable {
     /**
      * Pass a key to use bearer authentication with the configured endpoint.
      */
-    public void setAuthBearer(byte[] key) {
+    public void setAuthBearer(String key) {
         this.lock.lock();
         this.authBearerKey = key;
         this.lock.unlock();
@@ -187,8 +187,7 @@ public class PubControlClient implements Runnable {
                     signWith(SignatureAlgorithm.HS256, decodedKey).compact();
             return "Bearer " + token;
         } else if (this.authBearerKey != null) {
-            String keyString = new String(this.authBearerKey, StandardCharsets.UTF_8);
-            return "Bearer " + keyString;
+            return "Bearer " + this.authBearerKey;
         }
 
         return null;
