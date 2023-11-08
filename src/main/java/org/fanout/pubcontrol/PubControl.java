@@ -62,6 +62,8 @@ public class PubControl {
                 Map<String, Object> claims = new HashMap<String, Object>();
                 claims.put("iss", (String)iss);
                 client.setAuthJwt(claims, (byte[])key);
+            } else if (key != null) {
+                client.setAuthBearer(key);
             }
             this.clients.add(client);
         }
