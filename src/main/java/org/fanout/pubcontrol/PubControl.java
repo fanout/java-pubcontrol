@@ -63,7 +63,7 @@ public class PubControl {
                 claims.put("iss", (String)iss);
                 client.setAuthJwt(claims, (byte[])key);
             } else if (key != null) {
-                client.setAuthBearer(key);
+                client.setAuthBearer((String)key);
             }
             this.clients.add(client);
         }
