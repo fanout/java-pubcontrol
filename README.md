@@ -37,7 +37,6 @@ Usage
 
 ```java
 import org.fanout.pubcontrol.*;
-import javax.xml.bind.DatatypeConverter;
 import java.util.*;
 
 public class PubControlExample {
@@ -78,7 +77,7 @@ public class PubControlExample {
         Map<String, Object> entry = new HashMap<String, Object>();
         entry.put("uri", "https://api.fanout.io/realm/<realm>");
         entry.put("iss", "<realm>");
-        entry.put("key", DatatypeConverter.parseBase64Binary("<key>"));
+        entry.put("key", Base64.getDecoder().decode("<key>"));
         config.add(entry);
         PubControl pub = new PubControl(config);
 

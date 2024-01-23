@@ -15,7 +15,6 @@ import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
 
 import java.security.Key;
-import javax.xml.bind.DatatypeConverter;
 import javax.crypto.spec.SecretKeySpec;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -171,7 +170,7 @@ public class PubControlClient implements Runnable {
     private String genAuthHeader() {
         if (this.authBasicUser != null && this.authBasicPass != null) {
             try {
-                return DatatypeConverter.printBase64Binary(
+                return Base64.getEncoder().encodeToString(
                         (this.authBasicUser + ":" +
                         this.authBasicPass).getBytes("utf-8"));
             } catch (UnsupportedEncodingException exception) { }
