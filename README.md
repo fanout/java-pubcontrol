@@ -75,9 +75,9 @@ public class PubControlExample {
         // Initialize PubControl with a single endpoint:
         List<Map<String, Object>> config = new ArrayList<Map<String, Object>>();
         Map<String, Object> entry = new HashMap<String, Object>();
-        entry.put("uri", "https://api.fanout.io/realm/<realm>");
-        entry.put("iss", "<realm>");
-        entry.put("key", Base64.getDecoder().decode("<key>"));
+        entry.put("uri", "https://api.fastly.com/service/<service-id>");
+        // The API token needs to have purge permission
+        entry.put("key", "<fastly-api-token>");
         config.add(entry);
         PubControl pub = new PubControl(config);
 
@@ -95,7 +95,7 @@ public class PubControlExample {
         pub.removeAllClients();
 
         // Explicitly add an endpoint as a PubControlClient instance:
-        PubControlClient pubClient = new PubControlClient("<myendpoint_uri");
+        PubControlClient pubClient = new PubControlClient("<myendpoint_uri>");
         // Optionally set JWT auth: pubClient.setAuthJwt(<claims>, '<key>')
         // Optionally set basic auth: pubClient.setAuthBasic('<user>', '<password>')
         pub.addClient(pubClient);
