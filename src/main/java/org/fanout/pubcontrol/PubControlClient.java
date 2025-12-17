@@ -7,6 +7,7 @@
 
 package org.fanout.pubcontrol;
 
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.locks.*;
 import java.util.*;
 import java.io.UnsupportedEncodingException;
@@ -251,6 +252,7 @@ public class PubControlClient implements Runnable {
         URLConnection connection = null;
         int responseCode = 0;
         StringBuilder response = new StringBuilder();
+        byte[] body = jsonContent.getBytes(StandardCharsets.UTF_8);
         try {
             connection = url.openConnection();
             if (connection instanceof HttpURLConnection)
@@ -262,13 +264,15 @@ public class PubControlClient implements Runnable {
             connection.setRequestProperty("Content-Type",
                     "application/json");
             connection.setRequestProperty("Content-Length",
-                    Integer.toString(jsonContent.getBytes().length));
+                    Integer.toString(body.length));
             connection.setUseCaches(false);
             connection.setDoOutput(true);
+
             DataOutputStream dataOutputStream = new DataOutputStream (
             connection.getOutputStream());
-            dataOutputStream.writeBytes(jsonContent);
+            dataOutputStream.write(body);
             dataOutputStream.close();
+
             InputStream inputStream = connection.getInputStream();
             BufferedReader bufferedReader = new BufferedReader(
                     new InputStreamReader(inputStream));
