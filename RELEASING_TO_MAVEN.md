@@ -74,3 +74,8 @@ The following steps should be taken on each release.
    ```shell
    mvn clean deploy
    ```
+6. Complete publishing.
+   - Visit https://central.sonatype.com/publishing/deployments. You should see:
+      - Deployment ID, matching the deployment ID in the output above
+      - Status: Validated
+   - Click the **Publish** button.
