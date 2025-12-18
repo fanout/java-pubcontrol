@@ -1,89 +1,76 @@
-## Releasing to Maven Central
+## Releasing to Maven Central Repository
 
-This package is released to Maven Central via
-[Sonatype OSSRH](https://central.sonatype.org/publish/publish-guide/) by using Maven with the
-`nexus-staging-maven-plugin`.
+This package is released to Maven Central Repository by using Maven with the `central-publishing-maven-plugin`.
 
-This has been tested with OpenJDK 17.0.2 and Maven 3.9.6.
+This process has been tested with OpenJDK 17.0.17 and Maven 3.9.12.
 
 This is released under the `org.fanout` group ID, which is maintained by Fastly.
 
 ### Credentials
 
-> NOTE: Sonatype is moving away from Jira soon.
-
-At the time of this writing, this package is published to Maven Central using
-a Sonatype "legacy" Jira account created at https://issues.sonatype.org.
-See [Registering Via Legacy](https://central.sonatype.org/register/legacy/) in
-The Central Repository docs for details.
-
-When publishing, OSSRH will share the same email, username, and password as this account.
-If you need to update your email, username, or password, [do it in Jira](https://central.sonatype.org/register/legacy/#review-requirements).
+This package is published to Maven Central using a User Token under a Maven Central Repository account.
 
 ### GPG key
 
-Publishing requires you to prove your identity using GPG. Create a GPG keypair
-for the email associated with your Jira account. See [GPG](https://central.sonatype.org/publish/requirements/gpg/#review-requirements)
-in The Central Repository docs for details.
+Publishing requires you to prove your identity using GPG. Create a GPG keypair for the email associated with your Maven Central Repository account.
 
-Once you have published your GPG public key, note its key name and
-passphrase.
+Once you have published your GPG public key, note its key name and passphrase.
 
-### Configure Maven
+## Configure Maven
 
-> TODO: This currently uses username and password, but in the future
-> Sonatype is moving to requiring tokens for publishing.
+You will need copy `./.mvn/settings.example.xml` to `./.mvn/settings.xml`, and fill in the following using the User Token credentials and your GPG keyname and passphrase.  Do not commit this file to source control.
 
-You will need to add your credentials to `~/.m2/settings.xml`:
 ```xml
 <settings>
     <servers>
         <server>
-            <id>ossrh</id>
-            <username>*USERNAME*</username>
-            <password>*PASSWORD*</password>
+            <id>central</id>
+            <!-- Note: these are for the User Token, not the Maven Central Repository login -->
+            <username>**USERNAME**</username>
+            <password>**PASSWORD**</password>
         </server>
     </servers>
     <profiles>
         <profile>
-            <id>ossrh</id>
+            <id>central</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
             <properties>
-                <gpg.keyName>*KEYNAME*</gpg.keyName>
-                <gpg.passphrase>*PASSPHRASE*</gpg.passphrase>
+                <gpg.keyName>**KEYNAME**</gpg.keyName>
+                <gpg.passphrase>**PASSPHRASE**</gpg.passphrase>
             </properties>
         </profile>
     </profiles>
 </settings>
 ```
 
-Increment the pom.xml <version> tag to the version to release.
+## Release
 
-After doing so, you should be able to release to Maven using the commands
-```shell script
-mvn clean deploy
-```
+The following steps should be taken on each release.
 
-If everything succeeds, you'll see a message such as:
-
-```
-[INFO] Remote staging repositories are being released...
-
-Waiting for operation to complete...
-......
-
-[INFO] Remote staging repositories released.
-[INFO] ------------------------------------------------------------------------
-[INFO] BUILD SUCCESS
-[INFO] ------------------------------------------------------------------------
-[INFO] Total time:  02:41 min
-[INFO] Finished at: 2024-01-24T01:47:13+09:00
-[INFO] ------------------------------------------------------------------------
-```
-
-### Wrap up
-
-Commit the pom.xml (with the updated version number),
-and then add a tag and push to GitHub.
+1. Update docs + version
+   - Update `README.md` / `CHANGELOG.md`
+   - Bump `<version>` in `pom.xml`
+   - Commit (replace 1.0.0 below with the version you're releasing)
+     ```shell
+     git commit -m "Release 1.0.0"
+     ```
+2. Tag the release
+   - Create a tag
+     ```shell
+     git tag v1.0.0
+     ```
+3. Push commit + tag
+     ```shell
+     git push
+     git push --tags
+     ```
+4. Validate that tests pass, everything builds, sources/javadoc are valid, and GPG signing works.
+   ```shell
+   mvn clean verify
+   ```
+5. Release to Maven using the commands:
+   ```shell
+   mvn clean deploy
+   ```
