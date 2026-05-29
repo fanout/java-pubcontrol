@@ -12,7 +12,6 @@ import java.util.concurrent.locks.*;
 import java.util.*;
 import java.io.UnsupportedEncodingException;
 import java.net.*;
-import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
 
 import java.security.Key;
@@ -249,16 +248,13 @@ public class PubControlClient implements Runnable {
      */
     private void makeHttpRequest(URL url, String authHeader,
             String jsonContent) throws PublishFailedException {
-        URLConnection connection = null;
+        HttpURLConnection connection = null;
         int responseCode = 0;
         StringBuilder response = new StringBuilder();
         byte[] body = jsonContent.getBytes(StandardCharsets.UTF_8);
         try {
-            connection = url.openConnection();
-            if (connection instanceof HttpURLConnection)
-                ((HttpURLConnection)connection).setRequestMethod("POST");
-            else
-                ((HttpsURLConnection)connection).setRequestMethod("POST");
+            connection = (HttpURLConnection)url.openConnection();
+            connection.setRequestMethod("POST");
             if (authHeader != null)
                 connection.setRequestProperty("Authorization", authHeader);
             connection.setRequestProperty("Content-Type",
@@ -273,7 +269,14 @@ public class PubControlClient implements Runnable {
             dataOutputStream.write(body);
             dataOutputStream.close();
 
-            InputStream inputStream = connection.getInputStream();
+            responseCode = connection.getResponseCode();
+
+            InputStream inputStream;
+            if (responseCode >= 200 && responseCode < 300)
+                inputStream = connection.getInputStream();
+            else
+                inputStream = connection.getErrorStream();
+
             BufferedReader bufferedReader = new BufferedReader(
                     new InputStreamReader(inputStream));
             String line;
@@ -282,21 +285,12 @@ public class PubControlClient implements Runnable {
                 response.append('\r');
             }
             bufferedReader.close();
-            if (connection instanceof HttpURLConnection)
-                responseCode = ((HttpURLConnection)connection).getResponseCode();
-            else
-                responseCode = ((HttpsURLConnection)connection).getResponseCode();
         } catch (Exception exception) {
             throw new PublishFailedException("failed to publish: " +
                     exception.getMessage());
         } finally {
             if (connection != null)
-            {
-                if (connection instanceof HttpURLConnection)
-                    ((HttpURLConnection)connection).disconnect();
-                else
-                    ((HttpsURLConnection)connection).disconnect();
-            }
+                connection.disconnect();
         }
         if (responseCode < 200 || responseCode >= 300)
             throw new PublishFailedException("failed to publish: " +
