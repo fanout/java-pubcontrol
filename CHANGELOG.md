@@ -6,3 +6,5 @@
 - add support for bearer tokens
 1.0.9
 - fanout byte change
+1.0.10
+- fix: inclusion of the response body in publishing exceptions
