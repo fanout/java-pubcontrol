@@ -74,6 +74,20 @@ The following steps should be taken on each release.
    ```shell
    mvn clean deploy
    ```
+
+   If everything succeeds, you'll see messages that end with lines such as:
+   ```
+   [INFO] Uploaded bundle successfully, deployment name: Deployment, deploymentId: befad37c-d2f7-4583-92e8-33f23b9c88a3. Deployment will require manual publishing
+   [INFO] Waiting until Deployment befad37c-d2f7-4583-92e8-33f23b9c88a3 is validated
+   [INFO] Deployment befad37c-d2f7-4583-92e8-33f23b9c88a3 has been validated. To finish publishing visit https://central.sonatype.com/publishing/deployments
+   [INFO] ------------------------------------------------------------------------
+   [INFO] BUILD SUCCESS
+   [INFO] ------------------------------------------------------------------------
+   [INFO] Total time:  9.341 s
+   [INFO] Finished at: 2025-12-19T02:04:28+09:00
+   [INFO] ------------------------------------------------------------------------
+   ```
+
 6. Complete publishing.
    - Visit https://central.sonatype.com/publishing/deployments. You should see:
       - Deployment ID, matching the deployment ID in the output above
